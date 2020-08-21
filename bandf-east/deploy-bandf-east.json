@@ -1,0 +1,1079 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_app_name": {
+            "defaultValue": "app",
+            "type": "String"
+        },
+        "virtualMachines_web_name": {
+            "defaultValue": "web",
+            "type": "String"
+        },
+        "routeTables_Backend_name": {
+            "defaultValue": "Backend",
+            "type": "String"
+        },
+        "routeTables_DBSubnet_name": {
+            "defaultValue": "DBSubnet",
+            "type": "String"
+        },
+        "routeTables_Frontend_name": {
+            "defaultValue": "Frontend",
+            "type": "String"
+        },
+        "routeTables_AppSubnet_name": {
+            "defaultValue": "AppSubnet",
+            "type": "String"
+        },
+        "routeTables_WebSubnet_name": {
+            "defaultValue": "WebSubnet",
+            "type": "String"
+        },
+        "virtualNetworks_vnet01_name": {
+            "defaultValue": "vnet01",
+            "type": "String"
+        },
+        "networkInterfaces_web50_name": {
+            "defaultValue": "web50",
+            "type": "String"
+        },
+        "networkInterfaces_app336_name": {
+            "defaultValue": "app336",
+            "type": "String"
+        },
+        "publicIPAddresses_vnet01_Bastion_name": {
+            "defaultValue": "vnet01-Bastion",
+            "type": "String"
+        },
+        "networkSecurityGroups_East_Web_NSG_name": {
+            "defaultValue": "East-Web_NSG",
+            "type": "String"
+        },
+        "virtualMachines_BandFEastCHeckpoint_name": {
+            "defaultValue": "BandFEastCHeckpoint",
+            "type": "String"
+        },
+        "publicIPAddresses_BandFEastCHeckpoint_name": {
+            "defaultValue": "BandFEastCHeckpoint",
+            "type": "String"
+        },
+        "storageAccounts_bootdiagic6ivh6siyumg_name": {
+            "defaultValue": "bootdiagic6ivh6siyumg",
+            "type": "String"
+        },
+        "networkInterfaces_BandFEastCHeckpoint_eth0_name": {
+            "defaultValue": "BandFEastCHeckpoint-eth0",
+            "type": "String"
+        },
+        "networkInterfaces_BandFEastCHeckpoint_eth1_name": {
+            "defaultValue": "BandFEastCHeckpoint-eth1",
+            "type": "String"
+        },
+        "virtualNetworks_vnet01_externalid": {
+            "defaultValue": "/subscriptions/8f7d862b-5995-401f-a514-7f9f1f9ebae5/resourceGroups/BandF-West-Test/providers/Microsoft.Network/virtualNetworks/vnet01",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [{
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkSecurityGroups_East_Web_NSG_name')]",
+            "location": "eastus2",
+            "properties": {
+                "securityRules": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('publicIPAddresses_BandFEastCHeckpoint_name')]",
+            "location": "eastus2",
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "ipAddress": "52.167.169.14",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 30,
+                "dnsSettings": {
+                    "domainNameLabel": "bandfeastcheckpoint-ic6ivh6siyumg",
+                    "fqdn": "bandfeastcheckpoint-ic6ivh6siyumg.eastus2.cloudapp.azure.com"
+                },
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('publicIPAddresses_vnet01_Bastion_name')]",
+            "location": "eastus2",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "ipAddress": "52.177.233.168",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('routeTables_AppSubnet_name')]",
+            "location": "eastus2",
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": [{
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.4"
+                        }
+                    },
+                    {
+                        "name": "other-subnets",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/16",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.4"
+                        }
+                    },
+                    {
+                        "name": "app-sub-local",
+                        "properties": {
+                            "addressPrefix": "10.15.3.0/24",
+                            "nextHopType": "VnetLocal"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('routeTables_Backend_name')]",
+            "location": "eastus2",
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": [{
+                    "name": "To-Internet",
+                    "properties": {
+                        "addressPrefix": "0.0.0.0/0",
+                        "nextHopType": "VirtualAppliance",
+                        "nextHopIpAddress": "10.15.1.4"
+                    }
+                }]
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('routeTables_DBSubnet_name')]",
+            "location": "eastus2",
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": [{
+                        "name": "Default",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.4"
+                        }
+                    },
+                    {
+                        "name": "Other-Subnets",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/16",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.4"
+                        }
+                    },
+                    {
+                        "name": "DB-Sub-Local",
+                        "properties": {
+                            "addressPrefix": "10.15.4.0/24",
+                            "nextHopType": "VnetLocal"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('routeTables_Frontend_name')]",
+            "location": "eastus2",
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": [{
+                        "name": "Local-Subnet",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/24",
+                            "nextHopType": "VnetLocal"
+                        }
+                    },
+                    {
+                        "name": "To-Internal",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/16",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.0.4"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('routeTables_WebSubnet_name')]",
+            "location": "eastus2",
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": [{
+                        "name": "Web-Sub-Local",
+                        "properties": {
+                            "addressPrefix": "10.15.2.0/24",
+                            "nextHopType": "VnetLocal"
+                        }
+                    },
+                    {
+                        "name": "Other-Subnets",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/16",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.4"
+                        }
+                    },
+                    {
+                        "name": "Default",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.4"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('storageAccounts_bootdiagic6ivh6siyumg_name')]",
+            "location": "eastus2",
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": false,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkInterfaces_app336_name')]",
+            "location": "eastus2",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet01_name'), 'AppSub')]"
+            ],
+            "properties": {
+                "ipConfigurations": [{
+                    "name": "ipconfig1",
+                    "properties": {
+                        "privateIPAddress": "10.15.3.4",
+                        "privateIPAllocationMethod": "Dynamic",
+                        "subnet": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet01_name'), 'AppSub')]"
+                        },
+                        "primary": true,
+                        "privateIPAddressVersion": "IPv4"
+                    }
+                }],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkInterfaces_BandFEastCHeckpoint_eth1_name')]",
+            "location": "eastus2",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet01_name'), 'Backend')]"
+            ],
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "properties": {
+                "ipConfigurations": [{
+                    "name": "ipconfig2",
+                    "properties": {
+                        "privateIPAddress": "10.15.1.4",
+                        "privateIPAllocationMethod": "Static",
+                        "subnet": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet01_name'), 'Backend')]"
+                        },
+                        "primary": true,
+                        "privateIPAddressVersion": "IPv4"
+                    }
+                }],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": true,
+                "enableIPForwarding": true
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkInterfaces_web50_name')]",
+            "location": "eastus2",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet01_name'), 'WebSub')]"
+            ],
+            "properties": {
+                "ipConfigurations": [{
+                    "name": "ipconfig1",
+                    "properties": {
+                        "privateIPAddress": "10.15.2.4",
+                        "privateIPAllocationMethod": "Dynamic",
+                        "subnet": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet01_name'), 'WebSub')]"
+                        },
+                        "primary": true,
+                        "privateIPAddressVersion": "IPv4"
+                    }
+                }],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_AppSubnet_name'), '/app-sub-local')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_AppSubnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.3.0/24",
+                "nextHopType": "VnetLocal"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_DBSubnet_name'), '/DB-Sub-Local')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_DBSubnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.4.0/24",
+                "nextHopType": "VnetLocal"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_AppSubnet_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_AppSubnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "0.0.0.0/0",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.4"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_DBSubnet_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_DBSubnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "0.0.0.0/0",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.4"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_WebSubnet_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_WebSubnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "0.0.0.0/0",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.4"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Frontend_name'), '/Local-Subnet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Frontend_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.0.0/24",
+                "nextHopType": "VnetLocal"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_AppSubnet_name'), '/other-subnets')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_AppSubnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.0.0/16",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.4"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_DBSubnet_name'), '/Other-Subnets')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_DBSubnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.0.0/16",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.4"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_WebSubnet_name'), '/Other-Subnets')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_WebSubnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.0.0/16",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.4"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Frontend_name'), '/To-Internal')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Frontend_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.0.0/16",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.0.4"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Backend_name'), '/To-Internet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Backend_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "0.0.0.0/0",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.4"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_WebSubnet_name'), '/Web-Sub-Local')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_WebSubnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.2.0/24",
+                "nextHopType": "VnetLocal"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet01_name'), '/AppSub')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet01_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.3.0/24",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet01_name'), '/AzureBastionSubnet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet01_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.5.0/24",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet01_name'), '/DBSub')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet01_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.4.0/24",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet01_name'), '/peering')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet01_name'))]"
+            ],
+            "properties": {
+                "peeringState": "Connected",
+                "remoteVirtualNetwork": {
+                    "id": "[parameters('virtualNetworks_vnet01_externalid')]"
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": false,
+                "allowGatewayTransit": false,
+                "useRemoteGateways": false,
+                "remoteAddressSpace": {
+                    "addressPrefixes": [
+                        "10.16.0.0/16"
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bootdiagic6ivh6siyumg_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bootdiagic6ivh6siyumg_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('virtualMachines_app_name')]",
+            "location": "eastus2",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_app336_name'))]",
+                "[resourceId('Microsoft.Storage/StorageAccounts', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B2ms"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('virtualMachines_app_name'), '_OsDisk_1_89ad3d62037149e98ae9f850f224736a')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS",
+                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_app_name'), '_OsDisk_1_89ad3d62037149e98ae9f850f224736a'))]"
+                        },
+                        "diskSizeGB": 127
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_app_name')]",
+                    "adminUsername": "azureuser",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [{
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_app336_name'))]"
+                    }]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https://', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'), '.blob.core.windows.net/')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('virtualMachines_web_name')]",
+            "location": "eastus2",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_web50_name'))]",
+                "[resourceId('Microsoft.Storage/StorageAccounts', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B2ms"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('virtualMachines_web_name'), '_OsDisk_1_33e7c4399b224e73a60ca9f427e558de')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS",
+                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_web_name'), '_OsDisk_1_33e7c4399b224e73a60ca9f427e558de'))]"
+                        },
+                        "diskSizeGB": 127
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_web_name')]",
+                    "adminUsername": "azureuser",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [{
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_web50_name'))]"
+                    }]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https://', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'), '.blob.core.windows.net/')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkInterfaces_BandFEastCHeckpoint_eth0_name')]",
+            "location": "eastus2",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_BandFEastCHeckpoint_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet01_name'), 'Frontend')]"
+            ],
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "properties": {
+                "ipConfigurations": [{
+                    "name": "ipconfig1",
+                    "properties": {
+                        "privateIPAddress": "10.15.0.4",
+                        "privateIPAllocationMethod": "Static",
+                        "publicIPAddress": {
+                            "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_BandFEastCHeckpoint_name'))]"
+                        },
+                        "subnet": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet01_name'), 'Frontend')]"
+                        },
+                        "primary": true,
+                        "privateIPAddressVersion": "IPv4"
+                    }
+                }],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": true,
+                "enableIPForwarding": true
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('virtualNetworks_vnet01_name')]",
+            "location": "eastus2",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Frontend_name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Backend_name'))]"
+            ],
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.15.0.0/16"
+                    ]
+                },
+                "subnets": [{
+                        "name": "Frontend",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/24",
+                            "routeTable": {
+                                "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Frontend_name'))]"
+                            },
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "Backend",
+                        "properties": {
+                            "addressPrefix": "10.15.1.0/24",
+                            "routeTable": {
+                                "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Backend_name'))]"
+                            },
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "WebSub",
+                        "properties": {
+                            "addressPrefix": "10.15.2.0/24",
+                            "routeTable": {
+                                "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Backend_name'))]"
+                            },
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "AppSub",
+                        "properties": {
+                            "addressPrefix": "10.15.3.0/24",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "DBSub",
+                        "properties": {
+                            "addressPrefix": "10.15.4.0/24",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "AzureBastionSubnet",
+                        "properties": {
+                            "addressPrefix": "10.15.5.0/24",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [{
+                    "name": "peering",
+                    "properties": {
+                        "peeringState": "Connected",
+                        "remoteVirtualNetwork": {
+                            "id": "[parameters('virtualNetworks_vnet01_externalid')]"
+                        },
+                        "allowVirtualNetworkAccess": true,
+                        "allowForwardedTraffic": false,
+                        "allowGatewayTransit": false,
+                        "useRemoteGateways": false,
+                        "remoteAddressSpace": {
+                            "addressPrefixes": [
+                                "10.16.0.0/16"
+                            ]
+                        }
+                    }
+                }],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet01_name'), '/Backend')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet01_name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Backend_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.1.0/24",
+                "routeTable": {
+                    "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Backend_name'))]"
+                },
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet01_name'), '/Frontend')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet01_name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Frontend_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.0.0/24",
+                "routeTable": {
+                    "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Frontend_name'))]"
+                },
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet01_name'), '/WebSub')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet01_name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Backend_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.2.0/24",
+                "routeTable": {
+                    "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Backend_name'))]"
+                },
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bootdiagic6ivh6siyumg_name'), '/default/bootdiagnostics-app-55b2399a-9943-48d8-a45d-d1c454bcb746')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bootdiagic6ivh6siyumg_name'), '/default/bootdiagnostics-bandfeast-2c216c5b-3066-41d9-9a6f-274ef2c07b9b')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bootdiagic6ivh6siyumg_name'), '/default/bootdiagnostics-web-af792532-73d0-41a2-95aa-26e52ae8c620')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('virtualMachines_BandFEastCHeckpoint_name')]",
+            "location": "eastus2",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_BandFEastCHeckpoint_eth0_name'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_BandFEastCHeckpoint_eth1_name'))]",
+                "[resourceId('Microsoft.Storage/StorageAccounts', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'))]"
+            ],
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "plan": {
+                "name": "sg-byol",
+                "product": "check-point-cg-r8030",
+                "publisher": "checkpoint"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D3_v2"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "checkpoint",
+                        "offer": "check-point-cg-r8030",
+                        "sku": "sg-byol",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[parameters('virtualMachines_BandFEastCHeckpoint_name')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS",
+                            "id": "[resourceId('Microsoft.Compute/disks', parameters('virtualMachines_BandFEastCHeckpoint_name'))]"
+                        },
+                        "diskSizeGB": 100
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "bandfeastcheckpoint",
+                    "adminUsername": "notused",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "provisionVMAgent": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [{
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_BandFEastCHeckpoint_eth0_name'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_BandFEastCHeckpoint_eth1_name'))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https://', parameters('storageAccounts_bootdiagic6ivh6siyumg_name'), '.blob.core.windows.net/')]"
+                    }
+                }
+            }
+        }
+    ]
+}
