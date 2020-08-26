@@ -2,9 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "location": {
-      "value": "[resourceGroup().location]"
-    },
     "cloudGuardVersion": {
       "value": "R80.30 - Bring Your Own License"
     },
@@ -15,7 +12,7 @@
       "value": "password"
     },
     "sshPublicKey": {
-      "value": null
+      "value": ""
     },
     "vmName": {
       "value": "fd-cloudguardd-123"
@@ -51,10 +48,7 @@
       "value": "10.0.2.10"
     },
     "vnetNewOrExisting": {
-      "value": "existing"
-    },
-    "virtualNetworkExistingRGName": {
-      "value": "[resourceGroup().name]"
+      "value": "new"
     },
     "managementGUIClientNetwork": {
       "value": "0.0.0.0/0"
@@ -63,13 +57,10 @@
       "value": "gateway"
     },
     "bootstrapScript": {
-      "value": null
+      "value": ""
     },
     "allowDownloadFromUploadToCheckPoint": {
       "value": "true"
-    },
-    "additionalDiskSizeGB": {
-      "value": null
     },
     "diskType": {
       "value": "Standard_LRS"
@@ -81,7 +72,7 @@
       "value": "https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/"
     },
     "_artifactsLocationSasToken": {
-      "value": null
+      "value": ""
     },
     "Check_PointTags": {
       "value": {

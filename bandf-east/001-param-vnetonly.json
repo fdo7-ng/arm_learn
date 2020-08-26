@@ -1,0 +1,46 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "VNetSettings": {
+            "value": {
+                "name": "fd-ARM-vnet",
+                "addressPrefixes": [{
+                    "name": "firstPrefix",
+                    "addressPrefix": "10.15.0.0/16"
+                }],
+                "subnets": [{
+                        "name": "Frontend",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/24"
+                        }
+                    },
+                    {
+                        "name": "Backend",
+                        "properties": {
+                            "addressPrefix": "10.15.1.0/24"
+                        }
+                    }, 
+                    {
+                        "name": "WebSub",
+                        "properties": {
+                            "addressPrefix": "10.15.2.0/24"
+                        }
+                    }, 
+                    {
+                        "name": "AppSub",
+                        "properties": {
+                            "addressPrefix": "10.15.3.0/24"
+                        }
+                    }, 
+                    {
+                        "name": "DBSub",
+                        "properties": {
+                            "addressPrefix": "10.15.4.0/24"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

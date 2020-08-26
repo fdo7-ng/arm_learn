@@ -2,11 +2,43 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "VNetSettings": { "type": "object" }
+        "VNetSettings": { "type": "object" },
+        "RouteTables": { "type": "array" }
     },
     "functions": [],
     "variables": {},
     "resources": [
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('RouteTables')[copyIndex('routetablecopy')].name]",
+            "location": "eastus2",
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": "[parameters('RouteTables')[copyIndex('routetablecopy')].routes]"
+            },
+            "copy": {
+                "name": "routetablecopy",
+                "count": "[length(parameters('RouteTables'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2020-05-01",
+            "name": "mk-manualroutable",
+            "location": "eastus2",
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": [{
+                    "name": "To-Internet",
+                    "properties": {
+                        "addressPrefix": "0.0.0.0/0",
+                        "nextHopType": "VirtualAppliance",
+                        "nextHopIpAddress": "10.15.1.4"
+                    }
+                }]
+            }
+        },
         {
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/virtualNetworks",
@@ -18,20 +50,8 @@
                         "[parameters('VNetSettings').addressPrefixes[0].addressPrefix]"
                     ]
                 },
-                "subnets": [
-                    {
-                        "name": "[parameters('VNetSettings').subnets[0].name]",
-                        "properties": {
-                            "addressPrefix": "[parameters('VNetSettings').subnets[0].addressPrefix]"
-                        }
-                    },
-                    {
-                        "name": "[parameters('VNetSettings').subnets[1].name]",
-                        "properties": {
-                            "addressPrefix": "[parameters('VNetSettings').subnets[1].addressPrefix]"
-                        }
-                    }
-                ]
+                "subnets":"[parameters('VNetSettings').subnets]"
+
             }
         }
     ],

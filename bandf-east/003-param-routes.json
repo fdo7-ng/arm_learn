@@ -1,0 +1,165 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "VNetSettings": {
+            "value": {
+                "name": "fd-ARM-vnet",
+                "addressPrefixes": [{
+                    "name": "firstPrefix",
+                    "addressPrefix": "10.15.0.0/16"
+                }],
+                "subnets": [{
+                        "name": "Frontend",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/24"
+                        }
+                    },
+                    {
+                        "name": "Backend",
+                        "properties": {
+                            "addressPrefix": "10.15.1.0/24"
+                        }
+                    }, 
+                    {
+                        "name": "WebSub",
+                        "properties": {
+                            "addressPrefix": "10.15.2.0/24"
+                        }
+                    }, 
+                    {
+                        "name": "AppSub",
+                        "properties": {
+                            "addressPrefix": "10.15.3.0/24"
+                        }
+                    }, 
+                    {
+                        "name": "DBSub",
+                        "properties": {
+                            "addressPrefix": "10.15.4.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        "RouteTables": {
+            "value": [
+            {
+                "name": "AppSubnet",
+                "routes": [{
+                    "name": "default",
+                    "properties": {
+                        "addressPrefix": "0.0.0.0/0",
+                        "nextHopType": "VirtualAppliance",
+                        "nextHopIpAddress": "10.15.1.4"
+                    }
+                },
+                {
+                    "name": "other-subnets",
+                    "properties": {
+                        "addressPrefix": "10.15.0.0/16",
+                        "nextHopType": "VirtualAppliance",
+                        "nextHopIpAddress": "10.15.1.4"
+                    }
+                },
+                {
+                    "name": "app-sub-local",
+                    "properties": {
+                        "addressPrefix": "10.15.3.0/24",
+                        "nextHopType": "VnetLocal"
+                    }
+                }
+            ]
+            },
+            {
+                "name": "Backend",
+                "routes": [{
+                    "name": "To-Internet",
+                    "properties": {
+                        "addressPrefix": "0.0.0.0/0",
+                        "nextHopType": "VirtualAppliance",
+                        "nextHopIpAddress": "10.15.1.4"
+                    }
+                }]
+            },
+            {
+                "name": "DBSubnet",
+                "routes": [{
+                    "name": "Default",
+                    "properties": {
+                        "addressPrefix": "0.0.0.0/0",
+                        "nextHopType": "VirtualAppliance",
+                        "nextHopIpAddress": "10.15.1.4"
+                    }
+                },
+                {
+                    "name": "Other-Subnets",
+                    "properties": {
+                        "addressPrefix": "10.15.0.0/16",
+                        "nextHopType": "VirtualAppliance",
+                        "nextHopIpAddress": "10.15.1.4"
+                    }
+                },
+                {
+                    "name": "DB-Sub-Local",
+                    "properties": {
+                        "addressPrefix": "10.15.4.0/24",
+                        "nextHopType": "VnetLocal"
+                    }
+                }
+            ]
+            },
+            {
+                "name": "Frontend",
+                "routes": [{
+                    "name": "Local-Subnet",
+                    "properties": {
+                        "addressPrefix": "10.15.0.0/24",
+                        "nextHopType": "VnetLocal"
+                    }
+                },
+                {
+                    "name": "To-Internal",
+                    "properties": {
+                        "addressPrefix": "10.15.0.0/16",
+                        "nextHopType": "VirtualAppliance",
+                        "nextHopIpAddress": "10.15.0.4"
+                    }
+                }
+            ]
+            },
+            {
+                "name": "WebSubnet",
+                "routes": [{
+                    "name": "Web-Sub-Local",
+                    "properties": {
+                        "addressPrefix": "10.15.2.0/24",
+                        "nextHopType": "VnetLocal"
+                    }
+                },
+                {
+                    "name": "Other-Subnets",
+                    "properties": {
+                        "addressPrefix": "10.15.0.0/16",
+                        "nextHopType": "VirtualAppliance",
+                        "nextHopIpAddress": "10.15.1.4"
+                    }
+                },
+                {
+                    "name": "Default",
+                    "properties": {
+                        "addressPrefix": "0.0.0.0/0",
+                        "nextHopType": "VirtualAppliance",
+                        "nextHopIpAddress": "10.15.1.4"
+                    }
+                }
+            ]
+            }
+        ]
+    
+        }
+
+        
+
+    }
+}
