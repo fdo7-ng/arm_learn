@@ -1,0 +1,92 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "[resourceGroup().location]"
+    },
+    "cloudGuardVersion": {
+      "value": "R80.30 - Bring Your Own License"
+    },
+    "adminPassword": {
+      "value": "Passw0rd123!@#!"
+    },
+    "authenticationType": {
+      "value": "password"
+    },
+    "sshPublicKey": {
+      "value": null
+    },
+    "vmName": {
+      "value": "fd-cloudguardd-123"
+    },
+    "vmSize": {
+      "value": "Standard_D3_v2"
+    },
+    "sicKey": {
+      "value": "sfaasdfasfasdfafdasdfasfd234123aefasddf"
+    },
+    "virtualNetworkName": {
+      "value": "vnet"
+    },
+    "virtualNetworkAddressPrefix": {
+      "value": "10.0.0.0/16"
+    },
+    "Subnet1Name": {
+      "value": "Frontend"
+    },
+    "Subnet1Prefix": {
+      "value": "10.0.1.0/24"
+    },
+    "Subnet1StartAddress": {
+      "value": "10.0.1.10"
+    },
+    "Subnet2Name": {
+      "value": "Backend"
+    },
+    "Subnet2Prefix": {
+      "value": "10.0.2.0/24"
+    },
+    "Subnet2StartAddress": {
+      "value": "10.0.2.10"
+    },
+    "vnetNewOrExisting": {
+      "value": "new"
+    },
+    "virtualNetworkExistingRGName": {
+      "value": "[resourceGroup().name]"
+    },
+    "managementGUIClientNetwork": {
+      "value": "0.0.0.0/0"
+    },
+    "installationType": {
+      "value": "gateway"
+    },
+    "bootstrapScript": {
+      "value": null
+    },
+    "allowDownloadFromUploadToCheckPoint": {
+      "value": "true"
+    },
+    "additionalDiskSizeGB": {
+      "value": null
+    },
+    "diskType": {
+      "value": "Standard_LRS"
+    },
+    "sourceImageVhdUri": {
+      "value": "noCustomUri"
+    },
+    "_artifactsLocation": {
+      "value": "https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/"
+    },
+    "_artifactsLocationSasToken": {
+      "value": null
+    },
+    "Check_PointTags": {
+      "value": {
+        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+      }
+    }
+  }
+}
