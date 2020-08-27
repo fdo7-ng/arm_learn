@@ -6,6 +6,9 @@ This is for development for BANDF East Resource Group creation
 
 ##Updates:
 
+8/27/202 - deploy-vnet-v2.json and 004-param-routes.json. Successfully deploy vnet with route tables
+
+
 ##Files:
 
 deploy-bandf-east.json - is original template export form azure portal.
@@ -13,6 +16,7 @@ deploy-bandf-east.json - is original template export form azure portal.
 deploy-vnet.json - updated to use parameter file to deploy resources
 
 vnet_only_param.json - contains all params required for vnetcomponents
+
 
 
 ###Syntax

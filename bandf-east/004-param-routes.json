@@ -1,5 +1,4 @@
 {
-    //LIMITATION With this method cannot pass functions inside parameters
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
@@ -10,40 +9,49 @@
                     "name": "firstPrefix",
                     "addressPrefix": "10.15.0.0/16"
                 }],
-                "subnets": [{
-                        "name": "Frontend",
-                        "properties": {
+                "subnets": [
+                        {
+                            "purpose": "Frontend",
                             "addressPrefix": "10.15.0.0/24",
-                            // "routeTable": {
-                            //     "id": "[resourceId('Microsoft.Network/routeTables', 'Backend')]"
-                            // }
+                            "networkSecurityGroupName": "",
+                            "routeTableName": "Frontend",
+                            "serviceEndpoints": [],
+                            "delegations": []
+                        },
+                        {
+                            "purpose": "Backend",
+                            "addressPrefix": "10.15.1.0/24",
+                            "networkSecurityGroupName": "",
+                            "routeTableName": "Backend",
+                            "serviceEndpoints": [],
+                            "delegations": []
+                        },
+                        {
+                            "purpose": "WebSub",
+                            "addressPrefix": "10.15.2.0/24",
+                            "networkSecurityGroupName": "",
+                            "routeTableName": "",
+                            "serviceEndpoints": [],
+                            "delegations": []
+                        },
+                        {
+                            "purpose": "AppSub",
+                            "addressPrefix": "10.15.3.0/24",
+                            "networkSecurityGroupName": "",
+                            "routeTableName": "AppSubnet",
+                            "serviceEndpoints": [],
+                            "delegations": []
+                        },
+                        {
+                            "purpose": "DBSub",
+                            "addressPrefix": "10.15.4.0/24",
+                            "networkSecurityGroupName": "",
+                            "routeTableName": "DBSubnet",
+                            "serviceEndpoints": [],
+                            "delegations": []
                         }
-                    },
-                    {
-                        "name": "Backend",
-                        "properties": {
-                            "addressPrefix": "10.15.1.0/24"
-                        }
-                    }, 
-                    {
-                        "name": "WebSub",
-                        "properties": {
-                            "addressPrefix": "10.15.2.0/24"
-                        }
-                    }, 
-                    {
-                        "name": "AppSub",
-                        "properties": {
-                            "addressPrefix": "10.15.3.0/24"
-                        }
-                    }, 
-                    {
-                        "name": "DBSub",
-                        "properties": {
-                            "addressPrefix": "10.15.4.0/24"
-                        }
-                    }
-                ]
+                    ]
+                
             }
         },
         "RouteTables": {

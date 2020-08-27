@@ -6,7 +6,7 @@
       "value": "R80.30 - Bring Your Own License"
     },
     "adminPassword": {
-      "value": "Passw0rdd123123123!"
+      "value": "Passw0rd123!@#!"
     },
     "authenticationType": {
       "value": "password"
@@ -24,31 +24,34 @@
       "value": "sfaasdfasfasdfafdasdfasfd234123aefasddf"
     },
     "virtualNetworkName": {
-      "value": "vnet"
+      "value": "fd-ARM-vnet"
     },
     "virtualNetworkAddressPrefix": {
-      "value": "10.0.0.0/16"
+      "value": "10.15.0.0/16"
     },
     "Subnet1Name": {
       "value": "Frontend"
     },
     "Subnet1Prefix": {
-      "value": "10.0.1.0/24"
+      "value": "10.15.0.0/24"
     },
     "Subnet1StartAddress": {
-      "value": "10.0.1.10"
+      "value": "10.15.0.10"
     },
     "Subnet2Name": {
       "value": "Backend"
     },
     "Subnet2Prefix": {
-      "value": "10.0.2.0/24"
+      "value": "10.15.1.0/24"
     },
     "Subnet2StartAddress": {
-      "value": "10.0.2.10"
+      "value": "10.15.1.10"
     },
     "vnetNewOrExisting": {
-      "value": "new"
+      "value": "existing"
+    },
+    "virtualNetworkExistingRGName": {
+      "value": "fd-rg3-cloudguard"
     },
     "managementGUIClientNetwork": {
       "value": "0.0.0.0/0"
@@ -61,6 +64,9 @@
     },
     "allowDownloadFromUploadToCheckPoint": {
       "value": "true"
+    },
+    "additionalDiskSizeGB": {
+      "value": 0
     },
     "diskType": {
       "value": "Standard_LRS"

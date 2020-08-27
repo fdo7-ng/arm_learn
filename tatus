@@ -1,0 +1,23 @@
+[33mcommit 3e46b1109ec7371a80e97600ef7edc53b2d79dcc[m
+Author: fdo7-ng <fdo1979@gmail.com>
+Date:   Wed Aug 26 14:24:33 2020 +0000
+
+    working cloudguardd new infra param file
+
+[33mcommit 0cb27473146f0a69b2dea8ce8915d514fc2466e1[m
+Author: Fernando Ng <fernando.ng@cis.ntt.com>
+Date:   Wed Aug 26 09:50:55 2020 -0400
+
+    update readme
+
+[33mcommit 7e2a27e77f96d09791f86d34724d2857582a4c8f[m
+Author: Fernando Ng <fernando.ng@cis.ntt.com>
+Date:   Wed Aug 26 09:47:11 2020 -0400
+
+    add checkpoint arm template
+
+[33mcommit ad1897ddbbe69b076347f4410e0c0c957983f464[m
+Author: Fernando Ng <fernando.ng@cis.ntt.com>
+Date:   Fri Aug 21 16:32:26 2020 -0400
+
+    upload
