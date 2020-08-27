@@ -1,0 +1,771 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_App01_name": {
+            "defaultValue": "App01",
+            "type": "String"
+        },
+        "virtualMachines_Web01_name": {
+            "defaultValue": "Web01",
+            "type": "String"
+        },
+        "networkInterfaces_web0165_name": {
+            "defaultValue": "web0165",
+            "type": "String"
+        },
+        "networkInterfaces_app01421_name": {
+            "defaultValue": "app01421",
+            "type": "String"
+        },
+        "virtualNetworks_Primary_vNet_name": {
+            "defaultValue": "Primary-vNet",
+            "type": "String"
+        },
+        "bastionHosts_Primary_vNet_bastion_name": {
+            "defaultValue": "Primary-vNet-bastion",
+            "type": "String"
+        },
+        "publicIPAddresses_Primary_vNet_ip_name": {
+            "defaultValue": "Primary-vNet-ip",
+            "type": "String"
+        },
+        "publicIPAddresses_vnet_bastion_pip_name": {
+            "defaultValue": "vnet-bastion-pip",
+            "type": "String"
+        },
+        "routeTables_Band_Primary_Db_Sub_UDR_name": {
+            "defaultValue": "Band-Primary-Db-Sub-UDR",
+            "type": "String"
+        },
+        "routeTables_Band_Primary_App_Sub_UDR_name": {
+            "defaultValue": "Band-Primary-App-Sub-UDR",
+            "type": "String"
+        },
+        "routeTables_Band_Primary_Web_Sub_UDR_name": {
+            "defaultValue": "Band-Primary-Web-Sub-UDR",
+            "type": "String"
+        },
+        "storageAccounts_bandfcentralprimarydiag_name": {
+            "defaultValue": "bandfcentralprimarydiag",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [{
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('publicIPAddresses_Primary_vNet_ip_name')]",
+            "location": "centralus",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "ipAddress": "52.154.40.95",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('publicIPAddresses_vnet_bastion_pip_name')]",
+            "location": "centralus",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "ipAddress": "52.154.208.192",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('routeTables_Band_Primary_App_Sub_UDR_name')]",
+            "location": "centralus",
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": [{
+                        "name": "Default",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.254"
+                        }
+                    },
+                    {
+                        "name": "Local",
+                        "properties": {
+                            "addressPrefix": "10.15.3.0/24",
+                            "nextHopType": "VnetLocal"
+                        }
+                    },
+                    {
+                        "name": "Other-Subnets",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/16",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.254"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('routeTables_Band_Primary_Db_Sub_UDR_name')]",
+            "location": "centralus",
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": [{
+                        "name": "Default",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.254"
+                        }
+                    },
+                    {
+                        "name": "Other-Subnets",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/16",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.254"
+                        }
+                    },
+                    {
+                        "name": "Local",
+                        "properties": {
+                            "addressPrefix": "10.15.4.0/24",
+                            "nextHopType": "VnetLocal"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('routeTables_Band_Primary_Web_Sub_UDR_name')]",
+            "location": "centralus",
+            "properties": {
+                "disableBgpRoutePropagation": false,
+                "routes": [{
+                        "name": "Default",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.254"
+                        }
+                    },
+                    {
+                        "name": "Other-Subs",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/16",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.15.1.254"
+                        }
+                    },
+                    {
+                        "name": "Local",
+                        "properties": {
+                            "addressPrefix": "10.15.2.0/24",
+                            "nextHopType": "VnetLocal"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('storageAccounts_bandfcentralprimarydiag_name')]",
+            "location": "centralus",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkInterfaces_app01421_name')]",
+            "location": "centralus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_Primary_vNet_name'), 'App-Sub')]"
+            ],
+            "properties": {
+                "ipConfigurations": [{
+                    "name": "ipconfig1",
+                    "properties": {
+                        "privateIPAddress": "10.15.3.4",
+                        "privateIPAllocationMethod": "Dynamic",
+                        "subnet": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_Primary_vNet_name'), 'App-Sub')]"
+                        },
+                        "primary": true,
+                        "privateIPAddressVersion": "IPv4"
+                    }
+                }],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkInterfaces_web0165_name')]",
+            "location": "centralus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_Primary_vNet_name'), 'Web-Sub')]"
+            ],
+            "properties": {
+                "ipConfigurations": [{
+                    "name": "ipconfig1",
+                    "properties": {
+                        "privateIPAddress": "10.15.2.4",
+                        "privateIPAllocationMethod": "Dynamic",
+                        "subnet": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_Primary_vNet_name'), 'Web-Sub')]"
+                        },
+                        "primary": true,
+                        "privateIPAddressVersion": "IPv4"
+                    }
+                }],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Band_Primary_App_Sub_UDR_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_App_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "0.0.0.0/0",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.254"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Band_Primary_Db_Sub_UDR_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Db_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "0.0.0.0/0",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.254"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Band_Primary_Web_Sub_UDR_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Web_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "0.0.0.0/0",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.254"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Band_Primary_App_Sub_UDR_name'), '/Local')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_App_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.3.0/24",
+                "nextHopType": "VnetLocal"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Band_Primary_Db_Sub_UDR_name'), '/Local')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Db_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.4.0/24",
+                "nextHopType": "VnetLocal"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Band_Primary_Web_Sub_UDR_name'), '/Local')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Web_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.2.0/24",
+                "nextHopType": "VnetLocal"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Band_Primary_App_Sub_UDR_name'), '/Other-Subnets')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_App_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.0.0/16",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.254"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Band_Primary_Db_Sub_UDR_name'), '/Other-Subnets')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Db_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.0.0/16",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.254"
+            }
+        },
+        {
+            "type": "Microsoft.Network/routeTables/routes",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('routeTables_Band_Primary_Web_Sub_UDR_name'), '/Other-Subs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Web_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.0.0/16",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.15.1.254"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_Primary_vNet_name'), '/AzureBastionSubnet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Primary_vNet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.200.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_Primary_vNet_name'), '/Backend')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Primary_vNet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.1.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_Primary_vNet_name'), '/FrontEnd')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Primary_vNet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.0.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bandfcentralprimarydiag_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bandfcentralprimarydiag_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bandfcentralprimarydiag_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bandfcentralprimarydiag_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('virtualMachines_App01_name')]",
+            "location": "centralus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_app01421_name'))]",
+                "[resourceId('Microsoft.Storage/StorageAccounts', parameters('storageAccounts_bandfcentralprimarydiag_name'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B2ms"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('virtualMachines_App01_name'), '_disk1_ca8db131341940e88a9f97938d62809e')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS",
+                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_App01_name'), '_disk1_ca8db131341940e88a9f97938d62809e'))]"
+                        },
+                        "diskSizeGB": 127
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_App01_name')]",
+                    "adminUsername": "azureuser",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [{
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_app01421_name'))]"
+                    }]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https://', parameters('storageAccounts_bandfcentralprimarydiag_name'), '.blob.core.windows.net/')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('virtualMachines_Web01_name')]",
+            "location": "centralus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_web0165_name'))]",
+                "[resourceId('Microsoft.Storage/StorageAccounts', parameters('storageAccounts_bandfcentralprimarydiag_name'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B2ms"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(parameters('virtualMachines_Web01_name'), '_disk1_f03fc8aa0d2c47c39c0a130a5e5124b9')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS",
+                            "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_Web01_name'), '_disk1_f03fc8aa0d2c47c39c0a130a5e5124b9'))]"
+                        },
+                        "diskSizeGB": 127
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_Web01_name')]",
+                    "adminUsername": "azureuser",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [{
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_web0165_name'))]"
+                    }]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https://', parameters('storageAccounts_bandfcentralprimarydiag_name'), '.blob.core.windows.net/')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/bastionHosts",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('bastionHosts_Primary_vNet_bastion_name')]",
+            "location": "centralus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_Primary_vNet_ip_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_Primary_vNet_name'), 'AzureBastionSubnet')]"
+            ],
+            "properties": {
+                "dnsName": "bst-49e5a9c6-9669-4834-9624-b210906d077b.bastion.azure.com",
+                "ipConfigurations": [{
+                    "name": "IpConf",
+                    "properties": {
+                        "privateIPAllocationMethod": "Dynamic",
+                        "publicIPAddress": {
+                            "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_Primary_vNet_ip_name'))]"
+                        },
+                        "subnet": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_Primary_vNet_name'), 'AzureBastionSubnet')]"
+                        }
+                    }
+                }]
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_Primary_vNet_name'), '/App-Sub')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Primary_vNet_name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_App_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.3.0/24",
+                "routeTable": {
+                    "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_App_Sub_UDR_name'))]"
+                },
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_Primary_vNet_name'), '/DB-Sub')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Primary_vNet_name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Db_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.4.0/24",
+                "routeTable": {
+                    "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Db_Sub_UDR_name'))]"
+                },
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_Primary_vNet_name'), '/Web-Sub')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_Primary_vNet_name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Web_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.15.2.0/24",
+                "routeTable": {
+                    "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Web_Sub_UDR_name'))]"
+                },
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bandfcentralprimarydiag_name'), '/default/bootdiagnostics-app01-19a86fc1-3342-4c19-9488-32a72602c518')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_bandfcentralprimarydiag_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bandfcentralprimarydiag_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bandfcentralprimarydiag_name'), '/default/bootdiagnostics-web01-ac773da2-401e-4ae5-9a82-e9052292db24')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_bandfcentralprimarydiag_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bandfcentralprimarydiag_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('virtualNetworks_Primary_vNet_name')]",
+            "location": "centralus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Web_Sub_UDR_name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Db_Sub_UDR_name'))]",
+                "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_App_Sub_UDR_name'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.15.0.0/16"
+                    ]
+                },
+                "subnets": [{
+                        "name": "FrontEnd",
+                        "properties": {
+                            "addressPrefix": "10.15.0.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "Backend",
+                        "properties": {
+                            "addressPrefix": "10.15.1.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "Web-Sub",
+                        "properties": {
+                            "addressPrefix": "10.15.2.0/24",
+                            "routeTable": {
+                                "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Web_Sub_UDR_name'))]"
+                            },
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "DB-Sub",
+                        "properties": {
+                            "addressPrefix": "10.15.4.0/24",
+                            "routeTable": {
+                                "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_Db_Sub_UDR_name'))]"
+                            },
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "App-Sub",
+                        "properties": {
+                            "addressPrefix": "10.15.3.0/24",
+                            "routeTable": {
+                                "id": "[resourceId('Microsoft.Network/routeTables', parameters('routeTables_Band_Primary_App_Sub_UDR_name'))]"
+                            },
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "AzureBastionSubnet",
+                        "properties": {
+                            "addressPrefix": "10.15.200.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            }
+        }
+    ]
+}

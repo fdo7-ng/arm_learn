@@ -1,0 +1,284 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_WestCheckpoint_name": {
+            "defaultValue": "WestCheckpoint",
+            "type": "String"
+        },
+        "publicIPAddresses_WestCheckpoint_name": {
+            "defaultValue": "WestCheckpoint",
+            "type": "String"
+        },
+        "networkInterfaces_WestCheckpoint_eth0_name": {
+            "defaultValue": "WestCheckpoint-eth0",
+            "type": "String"
+        },
+        "networkInterfaces_WestCheckpoint_eth1_name": {
+            "defaultValue": "WestCheckpoint-eth1",
+            "type": "String"
+        },
+        "storageAccounts_bootdiagubnuxzvss4jvm_name": {
+            "defaultValue": "bootdiagubnuxzvss4jvm",
+            "type": "String"
+        },
+        "virtualNetworks_Secondary_vNet_externalid": {
+            "defaultValue": "/subscriptions/8f7d862b-5995-401f-a514-7f9f1f9ebae5/resourceGroups/BandF-West-Secondary/providers/Microsoft.Network/virtualNetworks/Secondary-vNet",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkInterfaces_WestCheckpoint_eth1_name')]",
+            "location": "westus",
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig2",
+                        "properties": {
+                            "privateIPAddress": "10.16.1.4",
+                            "privateIPAllocationMethod": "Static",
+                            "subnet": {
+                                "id": "[concat(parameters('virtualNetworks_Secondary_vNet_externalid'), '/subnets/BackEnd')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": true,
+                "enableIPForwarding": true
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('publicIPAddresses_WestCheckpoint_name')]",
+            "location": "westus",
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "ipAddress": "40.78.58.65",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 30,
+                "dnsSettings": {
+                    "domainNameLabel": "westcheckpoint-ubnuxzvss4jvm",
+                    "fqdn": "westcheckpoint-ubnuxzvss4jvm.westus.cloudapp.azure.com"
+                },
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('storageAccounts_bootdiagubnuxzvss4jvm_name')]",
+            "location": "westus",
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": false,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkInterfaces_WestCheckpoint_eth0_name')]",
+            "location": "westus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WestCheckpoint_name'))]"
+            ],
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "10.16.0.4",
+                            "privateIPAllocationMethod": "Static",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_WestCheckpoint_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[concat(parameters('virtualNetworks_Secondary_vNet_externalid'), '/subnets/FrontEnd')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": true,
+                "enableIPForwarding": true
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bootdiagubnuxzvss4jvm_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiagubnuxzvss4jvm_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bootdiagubnuxzvss4jvm_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiagubnuxzvss4jvm_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_bootdiagubnuxzvss4jvm_name'), '/default/bootdiagnostics-westcheck-37f946d6-08c8-4b4c-bf7a-3c27ffb6c482')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_bootdiagubnuxzvss4jvm_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_bootdiagubnuxzvss4jvm_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('virtualMachines_WestCheckpoint_name')]",
+            "location": "westus",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_WestCheckpoint_eth0_name'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_WestCheckpoint_eth1_name'))]",
+                "[resourceId('Microsoft.Storage/StorageAccounts', parameters('storageAccounts_bootdiagubnuxzvss4jvm_name'))]"
+            ],
+            "tags": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            },
+            "plan": {
+                "name": "sg-byol",
+                "product": "check-point-cg-r8030",
+                "publisher": "checkpoint"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_D3_v2"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "checkpoint",
+                        "offer": "check-point-cg-r8030",
+                        "sku": "sg-byol",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[parameters('virtualMachines_WestCheckpoint_name')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS",
+                            "id": "[resourceId('Microsoft.Compute/disks', parameters('virtualMachines_WestCheckpoint_name'))]"
+                        },
+                        "diskSizeGB": 100
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "westcheckpoint",
+                    "adminUsername": "notused",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "provisionVMAgent": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_WestCheckpoint_eth0_name'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_WestCheckpoint_eth1_name'))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https://', parameters('storageAccounts_bootdiagubnuxzvss4jvm_name'), '.blob.core.windows.net/')]"
+                    }
+                }
+            }
+        }
+    ]
+}
