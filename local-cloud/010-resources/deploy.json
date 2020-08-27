@@ -2,11 +2,17 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "VNetSettings": { "type": "object" },
-        "RouteTables": { "type": "array" }
+        "VNetSettings": {
+            "type": "object"
+        },
+        "RouteTables": {
+            "type": "array"
+        }
     },
     "functions": [],
-    "variables": {},
+    "variables": {
+        "subnets": "[parameters('VNetSettings').subnets]"
+    },
     "resources": [
         {
             "type": "Microsoft.Network/routeTables",
@@ -23,25 +29,7 @@
             }
         },
         {
-            "type": "Microsoft.Network/routeTables",
-            "apiVersion": "2020-05-01",
-            "name": "mk-manualroutable",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "disableBgpRoutePropagation": false,
-                "routes": [{
-                    "name": "To-Internet",
-                    "properties": {
-                        "addressPrefix": "0.0.0.0/0",
-                        "nextHopType": "VirtualAppliance",
-                        "nextHopIpAddress": "10.15.1.4"
-                    }
-                }]
-            }
-        },
-        {
-            // "apiVersion": "2015-06-15",
-            "apiVersion": "2020-06-01",
+            "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[parameters('VNetSettings').name]",
             "location": "[resourceGroup().location]",
@@ -51,8 +39,22 @@
                         "[parameters('VNetSettings').addressPrefixes[0].addressPrefix]"
                     ]
                 },
-                "subnets":"[parameters('VNetSettings').subnets]"
-
+                "copy": [
+                    {
+                        "name": "subnets",
+                        "count": "[length(parameters('VNetSettings').subnets)]",
+                        "input": {
+                            "name": "[parameters('VNetSettings').subnets[copyIndex('subnets')].purpose]",
+                            "properties": {
+                                "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
+                                "networkSecurityGroup": "[if(empty(variables('subnets')[copyIndex('subnets')].networkSecurityGroupName), json('null'), json(concat('{\"id\": \"', resourceId('Microsoft.Network/networkSecurityGroups', variables('subnets')[copyIndex('subnets')].networkSecurityGroupName), '\"}')))]",
+                                "routeTable": "[if(empty(variables('subnets')[copyIndex('subnets')].routeTableName), json('null'), json(concat('{\"id\": \"', resourceId('Microsoft.Network/routeTables', variables('subnets')[copyIndex('subnets')].routeTableName), '\"}')))]",
+                                "serviceEndpoints": "[if(empty(variables('subnets')[copyIndex('subnets')].serviceEndpoints), json('null'), variables('subnets')[copyIndex('subnets')].serviceEndpoints)]",
+                                "delegations": "[if(empty(variables('subnets')[copyIndex('subnets')].delegations), json('null'),variables('subnets')[copyIndex('subnets')].delegations)]"
+                            }
+                        }
+                    }
+                ]
             }
         }
     ],
