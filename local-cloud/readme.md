@@ -10,8 +10,12 @@ Diagram used for ARM Template design
 
 Prior to running the ARM Template Resource Group must already be created. 
 
-## Deploy ARM Templates
+## Check Point CloudGuard 
 
+ARM Template for Checkpoint was obtained from official CheckPoint github link:
+- https://github.com/CheckPointSW/CloudGuardIaaS
+
+## Deploy ARM Templates
 
 Azure CLI
 ```
