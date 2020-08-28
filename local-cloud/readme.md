@@ -2,6 +2,10 @@
 
 ARM Template Developed specifically for Local Cloud Migration.
 
+Diagram used for ARM Template design
+
+![2site-checkpoint](./2site-checkpoint.png)
+
 ## Prequisite
 
 Prior to running the ARM Template Resource Group must already be created. 
