@@ -41,12 +41,20 @@
                             "routeTableName": "Band-Secondary-App-Sub-UDR",
                             "serviceEndpoints": [],
                             "delegations": []
-                        },
+                        }, 
                         {
                             "purpose": "DBSub",
                             "addressPrefix": "10.16.4.0/24",
                             "networkSecurityGroupName": "",
                             "routeTableName": "Band-Secondary-DB-Sub-UDR",
+                            "serviceEndpoints": [],
+                            "delegations": []
+                        }, 
+                        {
+                            "purpose": "SecSub",
+                            "addressPrefix": "10.16.5.0/24",
+                            "networkSecurityGroupName": "",
+                            "routeTableName": "Band-Secondary-Sec-Sub-UDR",
                             "serviceEndpoints": [],
                             "delegations": []
                         }
@@ -166,6 +174,33 @@
                     }
                 }
             ]
+            }, 
+            {
+                "name": "Band-Secondary-Sec-Sub-UDR",
+                "routes": [{
+                        "name": "Sec-Sub-Local",
+                        "properties": {
+                            "addressPrefix": "10.16.5.0/24",
+                            "nextHopType": "VnetLocal"
+                        }
+                    },
+                    {
+                        "name": "Other-Subnets",
+                        "properties": {
+                            "addressPrefix": "10.16.0.0/16",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.16.1.254"
+                        }
+                    },
+                    {
+                        "name": "Default",
+                        "properties": {
+                            "addressPrefix": "0.0.0.0/0",
+                            "nextHopType": "VirtualAppliance",
+                            "nextHopIpAddress": "10.16.1.254"
+                        }
+                    }
+                ]
             }
         ]
     
